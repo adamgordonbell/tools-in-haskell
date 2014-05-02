@@ -11,34 +11,25 @@ import Control.Monad
 -- | The main entry point.
 main :: IO ()
 main = do
-    c <- count
-    print c
+    contents <- getTildeContents
+    print $ countLines  contents
 
-getc :: IO (Maybe Char)
-getc = do
-    c <- getChar
-    if c == '~'
-        then return Nothing
-    else
-        return (Just c)
+getTildeContents :: IO String
+getTildeContents = liftM (takeTill '~') getContents
 
-putc :: Char -> IO ()
-putc = putChar               
+takeTill :: Eq a => a -> [a] -> [a]
+takeTill n (x:xs) = if x == n then []
+                        else x:(takeTill n xs)
 
-copy :: IO ()
-copy = do
-       ch <- getc
-       case ch of
-               Nothing -> return ()
-               Just c -> do
-                         putc c
-                         copy
 
-count :: IO Int
-count = do
-    ch <- getc
-    case ch of 
-        Nothing -> return 0
-        Just c ->  do
-            c1 <- count
-            return $ 1 + c1
+copy :: String -> String
+copy = id
+
+count :: String -> Int
+count = length
+
+countLines :: String -> Int
+countLines input = foldr count1 0 input
+    where 
+        count1 '\n' n = n + 1
+        count1 _ n = n
