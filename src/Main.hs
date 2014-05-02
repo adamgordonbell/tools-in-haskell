@@ -35,20 +35,15 @@ countLines input = foldr count1 0 input
         count1 _ n = n
 
 countWords :: String -> Int
-countWords input = length $ splitMany "\n \t\r" input
+countWords input = length $ splitBy isSpace input
 
-splitMany :: Eq a => [a] -> [a] -> [[a]]
-splitMany [] list = [list]
-splitMany (x:xs) list = clearEmpty . join $ (liftM $ splitMany xs) step
-  where step = split x list
+isSpace :: Char -> Bool
+isSpace a = elem a "\n \t\r"
 
-split :: Eq a => a -> [a] -> [[a]]
-split c s = case rest of
+splitBy :: Eq a => (a -> Bool) -> [a] -> [[a]]
+splitBy f s = case rest of
                 []     -> [chunk]
-                _:rest -> chunk : split c rest
-  where (chunk, rest) = break (==c) s
-
-clearEmpty :: [[a]] -> [[a]]
-clearEmpty [] = []
-clearEmpty ([]:xs) = clearEmpty xs
-clearEmpty (x:xs) = x:(clearEmpty xs)
+                _:rest -> case chunk of
+                            [] -> splitBy f rest
+                            _ -> chunk : splitBy f rest
+  where (chunk, rest) = break f s
