@@ -1,3 +1,4 @@
+
 module Main where
 
 --import qualified Data.ByteString
@@ -5,14 +6,17 @@ module Main where
 --import Text.ParserCombinators.Parsec
 --import Control.Monad.State
 --import Control.Exception
+
+import           Control.Arrow
 import           Control.Monad
 import           System.IO
 
 -- | The main entry point.
 main :: IO ()
 main = do
-    contents <- getTildeContents
-    print $ countWords contents
+    --contents <- getTildeContents
+    contents <- readFile "inputtext.txt"
+    print $ wc contents
 
 getTildeContents :: IO String
 getTildeContents = liftM (takeTill '~') getContents
@@ -21,6 +25,7 @@ takeTill :: Eq a => a -> [a] -> [a]
 takeTill n (x:xs) = if x == n then []
                         else x:(takeTill n xs)
 
+wc s = count &&& countWords &&& countLines $ s
 
 copy :: String -> String
 copy = id
@@ -40,7 +45,6 @@ countWords input = length $ splitBy isSpace input
 isSpace :: Char -> Bool
 isSpace a = elem a "\n \t\r"
 
-splitBy :: Eq a => (a -> Bool) -> [a] -> [[a]]
 splitBy f s = case rest of
                 []     -> [chunk]
                 _:rest -> case chunk of
